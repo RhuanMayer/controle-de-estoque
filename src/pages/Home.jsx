@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaFilter, FaExclamationCircle } from 'react-icons/fa';
+import ChatBot from "../components/layout/chatBot";
 
 function Home() {
   const [items, setItems] = useState([]);
@@ -220,8 +221,9 @@ function Home() {
 
   return (
     <div className="mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">📦 Controle de Estoque</h1>
 
+      <h1 className="text-3xl font-bold mb-6">📦 Controle de Estoque</h1>
+      <ChatBot />
       <button
         onClick={() => openEditModal(null)}
         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded"

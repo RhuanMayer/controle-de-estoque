@@ -1,0 +1,33 @@
+/* sideBar.css */
+
+/* Estilização da Scrollbar */
+.navbar-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.navbar-scroll::-webkit-scrollbar-track {
+  background: #005163;
+  border-radius: 10px;
+}
+
+.navbar-scroll::-webkit-scrollbar-thumb {
+  background: #007d9a;
+  border-radius: 10px;
+}
+
+.navbar-scroll::-webkit-scrollbar-thumb:hover {
+  background: #0091b2;
+}
+
+/* Transições e estilização da Sidebar */
+.sidebar-container {
+  overflow-x: hidden; /* Impede scroll horizontal */
+  overflow-y: auto;   /* Mantém scroll vertical se necessário */
+}
+
+.navbar-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%; /* Garantir que o conteúdo ocupe toda a altura da sidebar */
+}

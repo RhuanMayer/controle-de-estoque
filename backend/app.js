@@ -22,13 +22,7 @@ app.use((req, res, next) => {
 app.use('/itens', itensRoutes);
 app.use('/reservas', reservasRoutes); // melhor deixar '/reservas' explícito
 
-// Servir arquivos estáticos do React
-app.use(express.static(path.join(__dirname, '../dist')));
 
-// SPA fallback: qualquer rota que não seja API devolve o index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dist/index.html'));
-});
 
 // Inicia o servidor
 app.listen(port, () => {

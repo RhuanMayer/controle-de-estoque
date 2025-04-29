@@ -8,7 +8,7 @@ const Header = () => {
       <nav className="w-full mx-auto px-4 h-14 flex items-center justify-between">
         {/* LOGO */}
         <div className="text-white font-bold text-xl tracking-wider">
-          Estoque
+          EstoqueNet
         </div>
 
         {/* NAVBAR */}
