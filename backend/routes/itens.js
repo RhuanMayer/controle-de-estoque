@@ -6,29 +6,73 @@ const db = require('../db');
 
 // Rota para listar itens
 router.get('/', (req, res) => {
-  const { page = 1, limit = 10, nome, quantidade_maior_que } = req.query;
+  const { page = 1, limit = 10, count, ...filters } = req.query;
   const offset = (page - 1) * limit;
 
-  console.log('🔍 Parâmetros da consulta:', { page, limit, nome, quantidade_maior_que });
-
-  let query = 'SELECT * FROM itens WHERE 1=1';
-  if (nome) query += ` AND nome LIKE '%${nome}%'`;
-  if (quantidade_maior_que) query += ` AND quantidade > ${quantidade_maior_que}`;
-  query += ` LIMIT ${limit} OFFSET ${offset}`;
-
-  console.log('📝 SQL executado:', query);
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('❌ Erro na consulta:', err.message);
-      return res.status(500).json({ error: err.message });
+  // Primeiro fazemos a consulta do total se necessário
+  if (count) {
+    let countQuery = 'SELECT COUNT(*) as total FROM itens WHERE 1=1';
+    const params = [];
+    
+    // Adicione seus filtros aqui igual na query principal
+    if (filters.nome) {
+      countQuery += ` AND nome LIKE ?`;
+      params.push(`%${filters.nome}%`);
     }
+    // ... outros filtros
 
-    console.log(`✅ Retornados ${results.length} itens`);
-    console.log('📊 Primeiro item da lista:', results[0] || 'Nenhum item encontrado');
+    db.query(countQuery, params, (err, countResult) => {
+      if (err) {
+        console.error('Erro ao contar itens:', err);
+        return res.status(500).json({ error: err.message });
+      }
 
-    res.json(results);
-  });
+      const total = countResult[0].total;
+      
+      // Agora fazemos a consulta dos itens
+      let query = 'SELECT * FROM itens WHERE 1=1';
+      const queryParams = [];
+      
+      // Adicione os mesmos filtros
+      if (filters.nome) {
+        query += ` AND nome LIKE ?`;
+        queryParams.push(`%${filters.nome}%`);
+      }
+      // ... outros filtros
+
+      query += ` LIMIT ? OFFSET ?`;
+      queryParams.push(Number(limit), Number(offset));
+
+      db.query(query, queryParams, (err, results) => {
+        if (err) {
+          console.error('Erro na consulta:', err);
+          return res.status(500).json({ error: err.message });
+        }
+
+        res.json({
+          items: results,
+          total: total
+        });
+      });
+    });
+  } else {
+    // Consulta normal sem contar o total
+    let query = 'SELECT * FROM itens WHERE 1=1';
+    const params = [];
+    
+    // Filtros...
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(Number(limit), Number(offset));
+
+    db.query(query, params, (err, results) => {
+      if (err) {
+        console.error('Erro na consulta:', err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      res.json(results);
+    });
+  }
 });
 
 router.get('/consultaCodigo', (req, res) => {
@@ -58,7 +102,65 @@ router.get('/consultaCodigo', (req, res) => {
   });
 });
 
+router.get('/por-codigo', (req, res) => {
+  console.log('🔔 Nova requisição recebida em /por-codigo');
+  console.log('🔍 Query parameters recebidos:', req.query);
 
+  const { codigo } = req.query;
+
+  // Validação do código
+  if (!codigo) {
+    console.log('❌ Erro: Código não fornecido');
+    return res.status(400).json({ error: 'O código do item é obrigatório' });
+  }
+
+  console.log(`🔎 Buscando item com código: "${codigo}"`);
+  console.log('📝 Tipo do código:', typeof codigo, 'Tamanho:', codigo.length);
+
+  const query = 'SELECT * FROM itens WHERE codigo = ?';
+  console.log('🛠️ SQL a ser executado:', query);
+  console.log('📌 Parâmetros:', [codigo]);
+
+  // Execução da query
+  console.log('⚡ Executando consulta no banco de dados...');
+  const startTime = Date.now();
+  
+  db.query(query, [codigo], (err, results) => {
+    const queryTime = Date.now() - startTime;
+    console.log(`⏱️ Tempo de consulta: ${queryTime}ms`);
+
+    if (err) {
+      console.error('❌ Erro na consulta:', err);
+      console.log('🛑 Stack trace:', err.stack);
+      return res.status(500).json({ 
+        error: 'Erro no servidor',
+        details: err.message
+      });
+    }
+
+    console.log('✅ Resultados encontrados:', results.length);
+    
+    if (results.length === 0) {
+      console.log(`⚠️ Nenhum item encontrado com código "${codigo}"`);
+      return res.status(404).json({ 
+        error: 'Item não encontrado',
+        codigo_pesquisado: codigo
+      });
+    }
+
+    const itemEncontrado = results[0];
+    console.log('🎯 Item encontrado:');
+    console.log('   ID:', itemEncontrado.id);
+    console.log('   Código:', itemEncontrado.codigo);
+    console.log('   Nome:', itemEncontrado.nome);
+    console.log('   Quantidade:', itemEncontrado.quantidade);
+    
+    // Log adicional para verificar todos os campos
+    console.log('📦 Dados completos do item:', JSON.stringify(itemEncontrado, null, 2));
+
+    res.json(itemEncontrado);
+  });
+});
 
 
 // Rota para adicionar item

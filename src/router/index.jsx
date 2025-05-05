@@ -4,9 +4,12 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 
 import PageLayout from '../components/layout/pageLayout'
 import Login from '../pages/Login'
-import Inicio from '../pages/Home'
+import Inicio from '../pages/HomePage'
 import Reserva from '../pages/Reserva'
 import NotFound from '../pages/NotFound'
+import CadastroProduto from '../pages/CadastroProduto'
+import ConsultaProduto from '../pages/ConsultaProdutos'
+import CadastroCategoria from '../pages/CadastroCategoria'
 
 const Router = () => {
   return (
@@ -21,6 +24,9 @@ const Router = () => {
       <Route element={<PageLayout />}>
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/reserva" element={<Reserva />} />
+        <Route path="/cadastro-produto" element={<CadastroProduto />} />
+        <Route path="/consulta-produto" element={<ConsultaProduto />} />
+        <Route path="/cadastro-categoria" element={<CadastroCategoria />} />
       </Route>
 
       {/* Fallback */}
